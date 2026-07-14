@@ -66,6 +66,32 @@
     reveals.forEach(function (el) { io.observe(el); });
   }
 
+  // Scroll-indicator met lopend mannetje
+  var rail = document.querySelector('.scroll-rail');
+  if (rail) {
+    var fill = rail.querySelector('.rail-fill');
+    var runner = rail.querySelector('.rail-runner');
+    var ticking = false;
+    var idle;
+    function updateRail() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      var pct = (p * 100).toFixed(2) + '%';
+      fill.style.height = pct;
+      runner.style.top = pct;
+      ticking = false;
+    }
+    function onScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(updateRail); }
+      rail.classList.add('is-running');
+      clearTimeout(idle);
+      idle = setTimeout(function () { rail.classList.remove('is-running'); }, 180);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', updateRail);
+    updateRail();
+  }
+
   // Contactformulier (demo — verstuurt niet echt)
   var form = document.getElementById('contactForm');
   var note = document.getElementById('formNote');
