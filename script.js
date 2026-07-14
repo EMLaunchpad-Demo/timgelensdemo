@@ -5,23 +5,47 @@
   // Markeer dat JS actief is (voor scroll-reveal)
   document.documentElement.classList.add('js');
 
-  // Mobiel menu
+  // Mobiel menu (fullscreen)
   var toggle = document.getElementById('navToggle');
   var nav = document.getElementById('nav');
+  function setMenu(open) {
+    nav.classList.toggle('open', open);
+    toggle.classList.toggle('open', open);
+    document.body.classList.toggle('menu-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
+  }
   if (toggle && nav) {
     toggle.addEventListener('click', function () {
-      var open = nav.classList.toggle('open');
-      toggle.classList.toggle('open', open);
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
+      setMenu(!nav.classList.contains('open'));
     });
     nav.querySelectorAll('a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        nav.classList.remove('open');
-        toggle.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-      });
+      link.addEventListener('click', function () { setMenu(false); });
     });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('open')) setMenu(false);
+    });
+  }
+
+  // Scrollspy — markeer de actieve sectie in het menu
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));
+  var sections = navLinks
+    .map(function (a) {
+      var id = a.getAttribute('href');
+      return id && id.charAt(0) === '#' ? document.querySelector(id) : null;
+    })
+    .filter(Boolean);
+
+  if (sections.length && 'IntersectionObserver' in window) {
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        navLinks.forEach(function (a) {
+          a.classList.toggle('is-active', a.getAttribute('href') === '#' + entry.target.id);
+        });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    sections.forEach(function (s) { spy.observe(s); });
   }
 
   // Scroll-reveal
