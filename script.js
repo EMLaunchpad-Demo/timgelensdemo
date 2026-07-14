@@ -1,12 +1,11 @@
-/* Tim Gelens — demo website · kleine interacties */
+/* Tim Gelens — Kinesitherapie · interacties */
 (function () {
   'use strict';
 
-  // Jaartal in footer
-  var yearEl = document.getElementById('year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+  // Markeer dat JS actief is (voor scroll-reveal)
+  document.documentElement.classList.add('js');
 
-  // Mobiel menu openen/sluiten
+  // Mobiel menu
   var toggle = document.getElementById('navToggle');
   var nav = document.getElementById('nav');
   if (toggle && nav) {
@@ -16,8 +15,6 @@
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       toggle.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
     });
-
-    // Menu sluiten na klik op een link
     nav.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', function () {
         nav.classList.remove('open');
@@ -25,6 +22,24 @@
         toggle.setAttribute('aria-expanded', 'false');
       });
     });
+  }
+
+  // Scroll-reveal
+  var reveals = document.querySelectorAll('[data-reveal]');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('is-visible'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    reveals.forEach(function (el) { io.observe(el); });
   }
 
   // Contactformulier (demo — verstuurt niet echt)
@@ -41,7 +56,7 @@
         return;
       }
       note.textContent = 'Bedankt ' + naam.trim().split(' ')[0] +
-        '! Je aanvraag is goed ontvangen — we nemen snel contact op. (Demo)';
+        '! Je aanvraag is goed ontvangen — ik neem snel contact op. (Demo)';
       note.className = 'form-note ok';
       form.reset();
     });
